@@ -31,6 +31,11 @@ describe('Time to words', () => {
     expect(timeInWords).toBe('quarter past three');
   });
 
+  it('Handles 3:20', () => {
+    const timeInWords = convertTimeToWords('3:20');
+    expect(timeInWords).toBe('twenty past three');
+  });
+
   it('Handles 3:27', () => {
     const timeInWords = convertTimeToWords('3:27');
     expect(timeInWords).toBe('twenty seven past three');

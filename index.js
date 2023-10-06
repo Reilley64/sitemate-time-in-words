@@ -1,5 +1,45 @@
 // expecting time to be a string in the format like '8:15' or '12:30'
 function convertTimeToWords(time) {
+  const numberMap = new Map([
+    [0, 'zero'],
+    [1, 'one'],
+    [2, 'two'],
+    [3, 'three'],
+    [4, 'four'],
+    [5, 'five'],
+    [6, 'six'],
+    [7, 'seven'],
+    [8, 'eight'],
+    [9, 'nine'],
+    [10, 'ten'],
+    [11, 'eleven'],
+    [12, 'twelve'],
+    [20, 'twenty'],
+    [30, 'thirty'],
+  ]);
+
+  function getMinutesAsString(minutes) {
+    const minutesAsInt = parseInt(minutes, 10);
+
+    const [firstDigit, secondDigit] = minutes.toString().split('');
+    const firstDigitAsInt = parseInt(firstDigit, 10);
+    const secondDigitAsInt = parseInt(secondDigit, 10);
+
+    if (minutesAsInt < 14) {
+      return numberMap.get(minutesAsInt);
+    }
+
+    if (minutesAsInt < 20) {
+      return `${numberMap.get(secondDigitAsInt)}teen`;
+    }
+
+    if (secondDigitAsInt === 0) {
+      return numberMap.get(firstDigitAsInt * 10);
+    }
+
+    return `${numberMap.get(firstDigitAsInt * 10)} ${numberMap.get(secondDigitAsInt)}`;
+  }
+
   // TODO: real code goes here!
   if (time === '0:00') {
     return 'midnight';
@@ -11,69 +51,38 @@ function convertTimeToWords(time) {
 
   const [hour, minutes] = time.split(':');
 
-  const numberMap = new Map([
-    ['0', 'midnight'],
-    ['1', 'one'],
-    ['2', 'two'],
-    ['3', 'three'],
-    ['4', 'four'],
-    ['5', 'five'],
-    ['6', 'six'],
-    ['7', 'five'],
-    ['5', 'five'],
-    ['6', 'six'],
-    ['7', 'seven'],
-    ['8', 'eight'],
-    ['9', 'nine'],
-    ['10', 'ten'],
-    ['11', 'eleven'],
-    ['12', 'twelve'],
-    ['20', 'twenty'],
-    ['30', 'thirty'],
-  ]);
-
-  const [first, second] = minutes.split('');
-
+  const hoursAsInt = parseInt(hour, 10);
   const minutesAsInt = parseInt(minutes, 10);
 
-  let hourAsString;
-  let minuteAsString;
+  let hourResult;
+  let minuteResult;
   let joiner;
 
-  if (minutesAsInt < 30) {
+  if (minutesAsInt <= 30) {
+    hourResult = numberMap.get(hoursAsInt);
     joiner = 'past';
 
-    hourAsString = numberMap.get(hour);
-
-    if (minutesAsInt < 10) {
-      if (first === '0' && second === '0') {
-        minuteAsString = "o'clock";
-        return `${hourAsString} ${minuteAsString}`;
-      }
-
-      minuteAsString = numberMap.get(second);
-    } else if (minutesAsInt < 14) {
-      minuteAsString = numberMap.get(minutes);
-    } else if (minutesAsInt < 20) {
-      minuteAsString = `${numberMap.get(second)}teen`;
-    } else {
-      minuteAsString = `${numberMap.get(`${first}0`)} ${numberMap.get(second)}`;
+    if (minutesAsInt === 0) {
+      return `${hourResult} o'clock`;
     }
+
+    minuteResult = getMinutesAsString(minutes);
   } else {
+    hourResult = numberMap.get(hoursAsInt + 1);
     joiner = 'to';
 
-    const minutesTo = 60 - minutesAsInt;
+    const minutesToAsInt = 60 - minutesAsInt;
 
-    hourAsString = numberMap.get((parseInt(hour, 10) + 1).toString());
+    minuteResult = getMinutesAsString(minutesToAsInt.toString());
   }
 
-  if (minuteAsString === 'fiveteen') minuteAsString = 'quarter';
-  if (minuteAsString === 'thirty') {
-    minuteAsString = 'half past';
+  if (minuteResult === 'fiveteen') minuteResult = 'quarter';
+  if (minuteResult === 'thirty') {
+    minuteResult = 'half past';
     joiner = null;
   }
 
-  return [minuteAsString, joiner, hourAsString].filter((string) => Boolean(string)).join(' ');
+  return [minuteResult, joiner, hourResult].filter((string) => Boolean(string)).join(' ');
 }
 
 module.exports = { convertTimeToWords };
